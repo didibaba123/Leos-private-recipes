@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leo's 私房菜谱</title>
+<style>
+/* ========== Fonts (must be first) ========== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+
+/* ========== Reset & Base ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0b0b12;
+  --bg-card: rgba(22,22,40,0.65);
+  --bg-card-hover: rgba(34,34,58,0.8);
+  --bg-glass: rgba(18,18,32,0.55);
+  --gold: #d4af6a;
+  --gold-light: #e8cb8e;
+  --gold-dim: #a68a50;
+  --gold-glow: rgba(212,175,106,0.12);
+  --accent: #8b6f47;
+  --text: #ede9e3;
+  --text-muted: #8a8a9a;
+  --border: rgba(212,175,106,0.1);
+  --border-hover: rgba(212,175,106,0.25);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 8px 40px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 60px rgba(212,175,106,0.06);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Noto Serif SC", "Source Serif Pro", "Georgia", "Songti SC", serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Subtle background texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,175,106,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 20% 100%, rgba(100,80,50,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(140,110,60,0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Noise grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* ========== Typography ========== */
+h1, h2, h3, h4 {
+  font-family: "Noto Serif SC", "Playfair Display", "Georgia", serif;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ========== Aurora Background ========== */
+.aurora-container {
+  position: absolute;
+  inset: -40px;
+  overflow: hidden;
+  z-index: 0;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 40%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 40%, transparent 75%);
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0;
+  animation: auroraFadeIn 2s ease forwards, auroraFloat 8s ease-in-out infinite alternate;
+}
+
+.aurora-blob:nth-child(1) {
+  width: 500px; height: 400px;
+  background: radial-gradient(circle, rgba(212,175,106,0.35) 0%, rgba(180,150,80,0.15) 40%, transparent 70%);
+  top: -80px; left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0s, 0s;
+}
+
+.aurora-blob:nth-child(2) {
+  width: 400px; height: 350px;
+  background: radial-gradient(circle, rgba(190,155,85,0.25) 0%, rgba(160,130,70,0.1) 40%, transparent 70%);
+  top: -20px; left: 15%;
+  animation-delay: 0.4s, 1s;
+  animation-duration: 2s, 10s;
+}
+
+.aurora-blob:nth-child(3) {
+  width: 420px; height: 360px;
+  background: radial-gradient(circle, rgba(220,185,110,0.2) 0%, rgba(180,150,90,0.08) 40%, transparent 70%);
+  top: -10px; right: 10%;
+  animation-delay: 0.8s, 2s;
+  animation-duration: 2s, 12s;
+}
+
+@keyframes auroraFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes auroraFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+  100% { transform: translate(10px, -10px) scale(1.02); }
+}
+
+/* ========== BlurText Animation ========== */
+.site-title .blur-char {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(14px);
+  transform: translateY(10px);
+  animation: blurReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  color: var(--gold);
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 40%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes blurReveal {
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* ========== SplitText Animation ========== */
+.split-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px) rotateX(-40deg);
+  animation: splitReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes splitReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+}
+
+/* ========== Spotlight Card ========== */
+.card-spotlight {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(
+    300px circle at var(--x, 50%) var(--y, 50%),
+    rgba(212,175,106,0.08) 0%,
+    transparent 70%
+  );
+}
+
+.recipe-card:hover .card-spotlight {
+  opacity: 1;
+}
+
+/* ========== Header ========== */
+.site-header {
+  text-align: center;
+  padding: 100px 20px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.site-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--gold-dim));
+}
+
+.site-header::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--gold);
+  margin: 32px auto 0;
+  box-shadow: 0 0 20px rgba(212,175,106,0.3);
+}
+
+.header-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.header-ornament::before,
+.header-ornament::after {
+  content: '';
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(to var(--dir, right), var(--gold-dim), transparent);
+}
+
+.header-ornament::before { --dir: right; }
+.header-ornament::after { --dir: left; }
+
+.header-ornament .diamond {
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.site-title {
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  letter-spacing: 10px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.site-subtitle {
+  font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  font-size: clamp(0.9rem, 2vw, 1.15rem);
+  color: var(--text-muted);
+  font-style: italic;
+  letter-spacing: 5px;
+  font-weight: 300;
+}
+
+/* ========== Filter Tabs ========== */
+.filter-bar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.filter-btn {
+  font-family: inherit;
+  font-size: 0.88rem;
+  padding: 10px 28px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-muted);
+  border-radius: 40px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 3px;
+  backdrop-filter: blur(10px);
+}
+
+.filter-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--gold-light);
+  background: rgba(212,175,106,0.06);
+  transform: translateY(-1px);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--accent) 100%);
+  color: var(--bg);
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(212,175,106,0.2);
+}
+
+/* ========== Recipe Grid ========== */
+.recipes-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px 100px;
+}
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 32px;
+}
+
+/* ========== Recipe Card ========== */
+.recipe-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(50px);
+  backdrop-filter: blur(20px);
+  position: relative;
+}
+
+.recipe-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: linear-gradient(160deg, rgba(212,175,106,0.15), transparent 40%, transparent 60%, rgba(212,175,106,0.08));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.recipe-card:hover::before {
+  opacity: 1;
+}
+
+.recipe-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow), var(--shadow-glow);
+  border-color: var(--border-hover);
+}
+
+.card-image {
+  width: 100%;
+  height: 240px;
+  background: linear-gradient(135deg, #12122a 0%, #1a1a30 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(11,11,18,0.7) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recipe-card:hover .card-image img {
+  transform: scale(1.05);
+}
+
+.card-image .emoji-placeholder {
+  font-size: 4.5rem;
+  filter: saturate(0.7) brightness(0.9);
+  z-index: 0;
+}
+
+.card-category {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(11,11,18,0.7);
+  color: var(--gold);
+  font-size: 0.72rem;
+  padding: 5px 16px;
+  border-radius: 24px;
+  letter-spacing: 3px;
+  border: 1px solid rgba(212,175,106,0.2);
+  backdrop-filter: blur(12px);
+  z-index: 2;
+}
+
+.card-body {
+  padding: 26px 28px 30px;
+}
+
+.card-title {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  letter-spacing: 3px;
+}
+
+.card-desc {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 18px;
+}
+
+.card-meta {
+  display: flex;
+  gap: 18px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.card-meta .meta-icon {
+  color: var(--gold-dim);
+  font-size: 0.72rem;
+}
+
+/* ========== Detail Modal ========== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 1000;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 50px 16px;
+  backdrop-filter: blur(8px);
+}
+
+.modal-overlay.open {
+  display: flex;
+  animation: overlayIn 0.3s ease;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-width: 800px;
+  width: 100%;
+  position: relative;
+  animation: modalIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 25px 80px rgba(0,0,0,0.6), var(--shadow-glow);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background: rgba(11,11,18,0.6);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  z-index: 10;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.modal-close:hover {
+  background: rgba(212,175,106,0.12);
+  color: var(--gold);
+  border-color: var(--border-hover);
+}
+
+.detail-hero {
+  width: 100%;
+  height: 320px;
+  background: linear-gradient(135deg, #12122a 0%, #1a1a30 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.detail-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.detail-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-hero .emoji-placeholder {
+  font-size: 6rem;
+  filter: saturate(0.7);
+}
+
+.detail-body {
+  padding: 40px 48px 48px;
+}
+
+.detail-header {
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-title {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.detail-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+  line-height: 1.9;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.85rem;
+}
+
+.detail-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 22px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  transition: border-color 0.3s ease;
+}
+
+.detail-meta-item:hover {
+  border-color: var(--border-hover);
+}
+
+.detail-meta-item .label {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.detail-meta-item .value {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* Sections */
+.detail-section {
+  margin-bottom: 36px;
+}
+
+.detail-section-title {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  padding-left: 16px;
+  border-left: 2px solid var(--gold);
+  letter-spacing: 3px;
+  position: relative;
+}
+
+.detail-section-title::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: -4px;
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+/* Ingredients */
+.ingredients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.ingredient-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.ingredient-item:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+}
+
+.ingredient-item .name { color: var(--text); }
+.ingredient-item .amount {
+  color: var(--gold);
+  font-size: 0.82rem;
+  white-space: nowrap;
+  margin-left: 10px;
+}
+.ingredient-item .note {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* Steps */
+.steps-list {
+  list-style: none;
+  counter-reset: step;
+}
+
+.step-item {
+  counter-increment: step;
+  display: flex;
+  gap: 20px;
+  margin-bottom: 14px;
+  padding: 20px 24px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.92rem;
+  line-height: 1.9;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.step-item:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--gold), var(--accent));
+  color: var(--bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.82rem;
+  margin-top: 2px;
+  box-shadow: 0 2px 12px rgba(212,175,106,0.2);
+}
+
+/* Tips */
+.tips-list {
+  list-style: none;
+}
+
+.tip-item {
+  padding: 14px 20px 14px 24px;
+  margin-bottom: 10px;
+  background: var(--gold-glow);
+  border-left: 2px solid var(--gold-dim);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  transition: all 0.3s ease;
+}
+
+.tip-item:hover {
+  background: rgba(212,175,106,0.08);
+  color: var(--text);
+}
+
+/* Navigation */
+.detail-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+}
+
+.nav-btn {
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.86rem;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 1px;
+  backdrop-filter: blur(10px);
+}
+
+.nav-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--gold);
+  background: var(--bg-card-hover);
+  transform: translateX(var(--nav-dir, 0));
+}
+
+.nav-btn:first-child:hover { --nav-dir: -3px; }
+.nav-btn:last-child:hover { --nav-dir: 3px; }
+
+.nav-btn .arrow { color: var(--gold); font-size: 1.1rem; }
+
+/* ========== Footer ========== */
+.site-footer {
+  text-align: center;
+  padding: 50px 20px 60px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 1px;
+  background: var(--gold);
+  box-shadow: 0 0 15px rgba(212,175,106,0.3);
+}
+
+.site-footer .heart { color: var(--gold); }
+
+/* ========== Empty State ========== */
+.empty-state {
+  text-align: center;
+  padding: 100px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state .emoji { font-size: 3rem; margin-bottom: 16px; filter: saturate(0.6); }
+.empty-state p { font-size: 0.95rem; letter-spacing: 2px; }
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .site-header { padding: 70px 16px 40px; }
+  .recipe-grid { grid-template-columns: 1fr; gap: 24px; }
+  .recipes-container { padding: 0 16px 70px; }
+  .detail-body { padding: 28px 24px 32px; }
+  .detail-hero { height: 240px; }
+  .detail-title { font-size: 1.5rem; }
+  .ingredients-grid { grid-template-columns: 1fr; }
+  .detail-meta { gap: 10px; }
+  .detail-meta-item { padding: 10px 16px; }
+  .modal-overlay { padding: 24px 12px; }
+  .card-image { height: 200px; }
+  .filter-btn { padding: 8px 20px; font-size: 0.82rem; }
+}
+
+@media (max-width: 400px) {
+  .recipe-grid { grid-template-columns: 1fr; }
+  .card-body { padding: 20px 20px 24px; }
+  .detail-body { padding: 24px 18px 28px; }
+  .nav-btn { padding: 10px 16px; font-size: 0.82rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="aurora-container">
+    <div class="aurora-blob"></div>
+    <div class="aurora-blob"></div>
+    <div class="aurora-blob"></div>
+  </div>
+  <div class="header-ornament"><span class="diamond"></span></div>
+  <h1 class="site-title" id="siteTitle">私房菜谱</h1>
+  <p class="site-subtitle" id="siteSubtitle">Leo's Private Kitchen</p>
+</header>
+
+<!-- Filter -->
+<nav class="filter-bar">
+  <button class="filter-btn active" data-filter="all">全部</button>
+  <button class="filter-btn" data-filter="硬菜">硬菜</button>
+  <button class="filter-btn" data-filter="家常菜">家常菜</button>
+  <button class="filter-btn" data-filter="素菜">素菜</button>
+</nav>
+
+<!-- Recipe Grid -->
+<main class="recipes-container">
+  <div class="recipe-grid" id="recipeGrid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="emoji">🍽️</div>
+    <p>该分类下暂无菜谱</p>
+  </div>
+</main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content" id="modalContent">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <p>用 <span class="heart">♥</span> 烹饪 · Leo's Private Kitchen · 2026</p>
+</footer>
+
+<script>
+// ========== Recipe Data (embedded) ==========
+const recipes = [
+  {
+    id: "yu-tou-tang",
+    name: "鱼头汤",
+    emoji: "🐟",
+    category: "硬菜",
+    description: "奶白浓郁的鱼头汤，鲜美滋补，一碗暖到心里。",
+    prep_time: "15分钟",
+    cook_time: "40分钟",
+    servings: "3-4人份",
+    difficulty: "中等",
+    ingredients: [
+      { name: "花鲢鱼头", amount: "1个", note: "约600g" },
+      { name: "嫩豆腐", amount: "1块", note: "" },
+      { name: "姜片", amount: "5-6片", note: "" },
+      { name: "大葱", amount: "2段", note: "葱白" },
+      { name: "料酒", amount: "2勺", note: "" },
+      { name: "盐", amount: "适量", note: "" },
+      { name: "白胡椒粉", amount: "少许", note: "" },
+      { name: "食用油", amount: "适量", note: "" },
+      { name: "枸杞", amount: "少许", note: "可选" },
+      { name: "香菜", amount: "少许", note: "装饰用" }
+    ],
+    steps: [
+      "鱼头对半劈开，去除鱼鳃，清洗干净，用厨房纸巾擦干表面水分。",
+      "锅中倒入适量油，中大火烧至七成热，放入鱼头煎至两面金黄，约每面3分钟。",
+      "煎鱼头时放入姜片和葱段一起煸香。",
+      "沿锅边淋入料酒，随后倒入足量开水（一定要用开水，这是汤色奶白的关键）。",
+      "大火煮沸后保持大火滚煮10分钟，汤色开始变白。",
+      "转中火继续煮20分钟，期间放入切块的豆腐。",
+      "出锅前加盐和白胡椒粉调味，撒上枸杞和香菜即可。"
+    ],
+    tips: [
+      "鱼头一定要擦干再煎，否则容易粘锅和溅油。",
+      "倒入开水而非冷水是汤色奶白的关键秘诀。",
+      "全程保持中大火，小火炖出来的汤会偏清澈。",
+      "豆腐不要太早放，容易煮散。"
+    ]
+  },
+  {
+    id: "tang-cu-xiao-pai",
+    name: "糖醋小排",
+    emoji: "🍖",
+    category: "硬菜",
+    description: "色泽红亮、酸甜适口，外酥里嫩的经典上海味道。",
+    prep_time: "20分钟",
+    cook_time: "35分钟",
+    servings: "3-4人份",
+    difficulty: "中等",
+    ingredients: [
+      { name: "猪小排", amount: "500g", note: "让师傅剁小段" },
+      { name: "料酒", amount: "2勺", note: "" },
+      { name: "生抽", amount: "2勺", note: "" },
+      { name: "醋", amount: "3勺", note: "镇江香醋最佳" },
+      { name: "白糖", amount: "3勺", note: "" },
+      { name: "番茄酱", amount: "2勺", note: "" },
+      { name: "姜片", amount: "3-4片", note: "" },
+      { name: "葱段", amount: "适量", note: "" },
+      { name: "白芝麻", amount: "少许", note: "装饰用" },
+      { name: "食用油", amount: "适量", note: "" }
+    ],
+    steps: [
+      "小排冷水下锅，加姜片和料酒焯水，煮沸后撇去浮沫，捞出洗净沥干。",
+      "调糖醋汁：碗中混合生抽2勺、醋3勺、白糖3勺、番茄酱2勺、清水小半碗，搅拌均匀备用。",
+      "锅中倒油烧热，放入小排中火煎至表面微焦，约5-6分钟。",
+      "倒入调好的糖醋汁，加入姜片和葱段，大火煮沸。",
+      "转中小火加盖焖煮约25分钟，期间翻动几次防止粘锅。",
+      "开盖转大火收汁，不断翻炒使酱汁均匀裹在排骨上，汁浓即可。",
+      "装盘后撒上白芝麻点缀。"
+    ],
+    tips: [
+      "糖醋比例可根据个人口味微调，喜欢偏酸就多加点醋。",
+      "焯水后一定要沥干水分，煎的时候才能上色。",
+      "收汁时要不停翻炒，防止糖焦底。",
+      "镇江香醋的风味最搭糖醋排骨，白醋会偏酸。"
+    ]
+  },
+  {
+    id: "yan-xun-niu-xiao-pai",
+    name: "烟熏牛小排",
+    emoji: "🥩",
+    category: "硬菜",
+    description: "烟熏风味浓郁，肉质软嫩多汁，媲美西餐厅的硬核大菜。",
+    prep_time: "30分钟（腌制4小时）",
+    cook_time: "3小时",
+    servings: "4-6人份",
+    difficulty: "较难",
+    ingredients: [
+      { name: "牛小排", amount: "1kg", note: "带骨" },
+      { name: "烟熏辣椒粉", amount: "2勺", note: "" },
+      { name: "蒜粉", amount: "1勺", note: "" },
+      { name: "洋葱粉", amount: "1勺", note: "" },
+      { name: "黑胡椒碎", amount: "1勺", note: "" },
+      { name: "红糖", amount: "2勺", note: "" },
+      { name: "盐", amount: "1.5勺", note: "" },
+      { name: "酱油", amount: "3勺", note: "" },
+      { name: "蜂蜜", amount: "2勺", note: "" },
+      { name: "苹果醋", amount: "1勺", note: "" },
+      { name: "食用油", amount: "适量", note: "" }
+    ],
+    steps: [
+      "将烟熏辣椒粉、蒜粉、洋葱粉、黑胡椒碎、红糖和盐混合成干料。",
+      "牛小排洗净擦干，均匀涂抹干料，用保鲜膜包好放冰箱腌制至少4小时（过夜更佳）。",
+      "烤箱预热至150°C（300°F）。",
+      "铸铁锅或烤盘中倒入少许油，大火将牛小排每面煎2分钟至表面焦褐。",
+      "将酱油、蜂蜜、苹果醋混合，淋在牛小排上。",
+      "用锡纸紧紧包裹牛小排，放入烤箱低温慢烤2.5-3小时。",
+      "取出撕开锡纸，将烤盘汁液淋回肉上，不盖锡纸再烤15分钟使表面焦化。",
+      "取出静置10分钟后切开装盘。"
+    ],
+    tips: [
+      "低温慢烤是关键，温度太高肉会发柴。",
+      "腌制时间越长越入味，建议至少提前一晚准备。",
+      "没有烟熏辣椒粉可以用普通辣椒粉+液体烟熏调味料替代。",
+      "煎制封表面可以锁住肉汁，这一步不要省略。",
+      "静置后再切可以防止肉汁流失。"
+    ]
+  },
+  {
+    id: "ke-le-ji-chi",
+    name: "可乐鸡翅",
+    emoji: "🍗",
+    category: "家常菜",
+    description: "甜香入味、色泽诱人，大人小孩都爱的经典家常菜。",
+    prep_time: "10分钟",
+    cook_time: "25分钟",
+    servings: "2-3人份",
+    difficulty: "简单",
+    ingredients: [
+      { name: "鸡翅中", amount: "12个", note: "约500g" },
+      { name: "可乐", amount: "1罐", note: "330ml，用普通可乐" },
+      { name: "生抽", amount: "3勺", note: "" },
+      { name: "老抽", amount: "1勺", note: "上色用" },
+      { name: "料酒", amount: "1勺", note: "" },
+      { name: "姜片", amount: "4-5片", note: "" },
+      { name: "蒜瓣", amount: "3-4瓣", note: "拍碎" },
+      { name: "干辣椒", amount: "2个", note: "可选" },
+      { name: "食用油", amount: "少许", note: "" }
+    ],
+    steps: [
+      "鸡翅洗净，两面各划两刀方便入味。",
+      "冷水下锅焯水，加姜片和料酒，煮沸后捞出洗净沥干。",
+      "锅中倒少许油，放入鸡翅中火煎至两面金黄。",
+      "放入姜片、蒜瓣和干辣椒翻炒出香味。",
+      "倒入可乐，加入生抽和老抽，大火煮沸。",
+      "转中小火加盖焖煮15-18分钟。",
+      "开盖大火收汁，不断翻动鸡翅使酱汁均匀裹附，汁浓亮即可出锅。"
+    ],
+    tips: [
+      "一定要用普通可乐，零度或无糖可乐做不出粘稠的酱汁。",
+      "鸡翅划刀可以更好地入味和缩短烹饪时间。",
+      "收汁时注意火候，糖分高容易糊底。",
+      "喜欢辣味可以多放干辣椒或加少许辣椒酱。"
+    ]
+  },
+  {
+    id: "cheng-zhi-san-wen-yu",
+    name: "橙汁三文鱼",
+    emoji: "🍊",
+    category: "家常菜",
+    description: "清新的橙香与鲜嫩的三文鱼完美融合，健康又美味的轻食之选。",
+    prep_time: "10分钟",
+    cook_time: "15分钟",
+    servings: "2人份",
+    difficulty: "简单",
+    ingredients: [
+      { name: "三文鱼排", amount: "2块", note: "约300g" },
+      { name: "鲜橙", amount: "2个", note: "1个榨汁，1个切片装饰" },
+      { name: "蜂蜜", amount: "1勺", note: "" },
+      { name: "酱油", amount: "1勺", note: "" },
+      { name: "黄油", amount: "15g", note: "" },
+      { name: "蒜末", amount: "1勺", note: "" },
+      { name: "盐", amount: "适量", note: "" },
+      { name: "黑胡椒", amount: "适量", note: "" },
+      { name: "迷迭香", amount: "1小枝", note: "可选" }
+    ],
+    steps: [
+      "三文鱼用厨房纸巾擦干，两面撒盐和黑胡椒腌制5分钟。",
+      "鲜橙榨汁，与蜂蜜和酱油混合成橙汁酱汁。",
+      "平底锅中火融化黄油，放入三文鱼皮面朝下煎3-4分钟至皮酥脆。",
+      "翻面继续煎2分钟，取出备用。",
+      "同一锅中加入蒜末炒香，倒入橙汁酱汁煮沸。",
+      "小火熬煮2-3分钟至酱汁稍微浓稠。",
+      "将三文鱼放回锅中，用酱汁浇淋鱼身，煮1分钟。",
+      "装盘后淋上锅中酱汁，用橙片和迷迭香装饰。"
+    ],
+    tips: [
+      "三文鱼不要煎过头，中间保持微粉色口感最嫩。",
+      "用鲜榨橙汁风味远胜瓶装橙汁。",
+      "煎鱼皮时不要急着翻面，等皮自然脱离锅底再翻。",
+      "酱汁不需要太浓，保持轻盈的口感更搭配三文鱼。"
+    ]
+  },
+  {
+    id: "sha-guo-yu",
+    name: "砂锅鱼",
+    emoji: "🍲",
+    category: "家常菜",
+    description: "砂锅慢炖出的鲜美鱼汤，配上软糯的粉丝和豆腐，暖身又暖胃。",
+    prep_time: "15分钟",
+    cook_time: "30分钟",
+    servings: "3-4人份",
+    difficulty: "中等",
+    ingredients: [
+      { name: "鲈鱼", amount: "1条", note: "约500g，处理干净" },
+      { name: "粉丝", amount: "1把", note: "提前泡软" },
+      { name: "嫩豆腐", amount: "1块", note: "切块" },
+      { name: "白菜", amount: "3-4片", note: "手撕" },
+      { name: "姜片", amount: "5-6片", note: "" },
+      { name: "大葱", amount: "2段", note: "" },
+      { name: "蒜瓣", amount: "4-5瓣", note: "" },
+      { name: "生抽", amount: "2勺", note: "" },
+      { name: "料酒", amount: "2勺", note: "" },
+      { name: "盐", amount: "适量", note: "" },
+      { name: "白胡椒粉", amount: "少许", note: "" },
+      { name: "食用油", amount: "适量", note: "" },
+      { name: "香菜", amount: "少许", note: "装饰" }
+    ],
+    steps: [
+      "鲈鱼处理干净，两面划花刀，用料酒和少许盐抹匀腌制10分钟。",
+      "平底锅烧热倒油，将鱼两面煎至金黄，盛出备用。",
+      "砂锅中倒入少许油，放入姜片、葱段和蒜瓣爆香。",
+      "放入白菜垫底，铺上豆腐块。",
+      "将煎好的鱼放在上面，加入开水没过鱼身。",
+      "加入生抽，大火煮沸后转小火慢炖20分钟。",
+      "放入泡软的粉丝，继续煮5分钟。",
+      "加盐和白胡椒粉调味，撒上香菜，连砂锅一起上桌。"
+    ],
+    tips: [
+      "砂锅要提前预热，避免冷锅直接加热导致开裂。",
+      "鱼先煎后炖可以保持形状完整不散。",
+      "粉丝最后放，否则吸掉太多汤汁且容易粘锅底。",
+      "用砂锅保温效果好，上桌后还能持续冒泡很有氛围感。"
+    ]
+  }
+];
+
+// ========== Image Helper ==========
+function getRecipeImage(recipe, isDetail) {
+  const img = new Image();
+  const src = `images/${recipe.id}.jpg`;
+  const sizeClass = isDetail ? 'detail' : 'card';
+
+  return new Promise(resolve => {
+    img.onload = () => resolve(`<img src="${src}" alt="${recipe.name}" loading="lazy">`);
+    img.onerror = () => resolve(`<span class="emoji-placeholder">${recipe.emoji}</span>`);
+    img.src = src;
+  });
+}
+
+// Sync version: try img, fallback emoji via onerror
+function recipeImageHTML(recipe) {
+  return `<img src="images/${recipe.id}.jpg" alt="${recipe.name}" loading="lazy"
+    onerror="this.parentNode.innerHTML='<span class=\\'emoji-placeholder\\'>${recipe.emoji}</span>'"
+  >`;
+}
+
+// ========== Render Cards ==========
+const grid = document.getElementById('recipeGrid');
+const emptyState = document.getElementById('emptyState');
+let currentFilter = 'all';
+
+function renderCards(filter) {
+  currentFilter = filter;
+  const filtered = filter === 'all' ? recipes : recipes.filter(r => r.category === filter);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  grid.innerHTML = filtered.map((r, i) => `
+    <article class="recipe-card" data-id="${r.id}" style="transition-delay: ${i * 0.08}s">
+      <div class="card-spotlight"></div>
+      <div class="card-image">
+        ${recipeImageHTML(r)}
+        <span class="card-category">${r.category}</span>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">${r.name}</h3>
+        <p class="card-desc">${r.description}</p>
+        <div class="card-meta">
+          <span><span class="meta-icon">⏱</span> ${r.cook_time}</span>
+          <span><span class="meta-icon">👥</span> ${r.servings}</span>
+          <span><span class="meta-icon">📊</span> ${r.difficulty}</span>
+        </div>
+      </div>
+    </article>
+  `).join('');
+
+  // Trigger scroll animations & spotlight
+  requestAnimationFrame(() => {
+    observeCards();
+    initSpotlightCards();
+  });
+}
+
+// ========== Scroll Animation ==========
+function observeCards() {
+  const cards = document.querySelectorAll('.recipe-card');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  cards.forEach(card => observer.observe(card));
+}
+
+// ========== Filter ==========
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards(btn.dataset.filter);
+  });
+});
+
+// ========== Detail Modal ==========
+const overlay = document.getElementById('modalOverlay');
+const modalBody = document.getElementById('modalBody');
+let currentRecipeIndex = -1;
+
+function getFilteredRecipes() {
+  return currentFilter === 'all' ? recipes : recipes.filter(r => r.category === currentFilter);
+}
+
+function openDetail(recipeId) {
+  const filtered = getFilteredRecipes();
+  const idx = filtered.findIndex(r => r.id === recipeId);
+  if (idx === -1) return;
+  currentRecipeIndex = idx;
+  renderDetail(filtered[idx], filtered);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderDetail(recipe, filtered) {
+  const prevRecipe = currentRecipeIndex > 0 ? filtered[currentRecipeIndex - 1] : null;
+  const nextRecipe = currentRecipeIndex < filtered.length - 1 ? filtered[currentRecipeIndex + 1] : null;
+
+  modalBody.innerHTML = `
+    <div class="detail-hero">
+      ${recipeImageHTML(recipe)}
+    </div>
+    <div class="detail-body">
+      <div class="detail-header">
+        <h2 class="detail-title">${recipe.name}</h2>
+        <p class="detail-desc">${recipe.description}</p>
+        <div class="detail-meta">
+          <div class="detail-meta-item"><span class="label">准备时间</span><span class="value">${recipe.prep_time}</span></div>
+          <div class="detail-meta-item"><span class="label">烹饪时间</span><span class="value">${recipe.cook_time}</span></div>
+          <div class="detail-meta-item"><span class="label">份量</span><span class="value">${recipe.servings}</span></div>
+          <div class="detail-meta-item"><span class="label">难度</span><span class="value">${recipe.difficulty}</span></div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-section-title">食材清单</h3>
+        <div class="ingredients-grid">
+          ${recipe.ingredients.map(ing => `
+            <div class="ingredient-item">
+              <span class="name">${ing.name}</span>
+              <span class="amount">${ing.amount}${ing.note ? ` <span class="note">(${ing.note})</span>` : ''}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-section-title">烹饪步骤</h3>
+        <ol class="steps-list">
+          ${recipe.steps.map((step, i) => `
+            <li class="step-item">
+              <span class="step-number">${i + 1}</span>
+              <span>${step}</span>
+            </li>
+          `).join('')}
+        </ol>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-section-title">小贴士</h3>
+        <ul class="tips-list">
+          ${recipe.tips.map(tip => `<li class="tip-item">${tip}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="detail-nav">
+        ${prevRecipe
+          ? `<button class="nav-btn" onclick="navigateRecipe(-1)"><span class="arrow">‹</span> ${prevRecipe.name}</button>`
+          : `<div></div>`}
+        ${nextRecipe
+          ? `<button class="nav-btn" onclick="navigateRecipe(1)">${nextRecipe.name} <span class="arrow">›</span></button>`
+          : `<div></div>`}
+      </div>
+    </div>
+  `;
+
+  // Scroll modal to top
+  overlay.scrollTop = 0;
+}
+
+function navigateRecipe(direction) {
+  const filtered = getFilteredRecipes();
+  const newIndex = currentRecipeIndex + direction;
+  if (newIndex < 0 || newIndex >= filtered.length) return;
+  currentRecipeIndex = newIndex;
+  renderDetail(filtered[newIndex], filtered);
+  overlay.scrollTop = 0;
+}
+
+function closeModal() {
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Event: click card to open
+grid.addEventListener('click', (e) => {
+  const card = e.target.closest('.recipe-card');
+  if (card) openDetail(card.dataset.id);
+});
+
+// Event: close modal
+document.getElementById('modalClose').addEventListener('click', closeModal);
+overlay.addEventListener('click', (e) => {
+  if (e.target === overlay) closeModal();
+});
+
+// Event: keyboard
+document.addEventListener('keydown', (e) => {
+  if (!overlay.classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft') navigateRecipe(-1);
+  if (e.key === 'ArrowRight') navigateRecipe(1);
+});
+
+// ========== BlurText Effect ==========
+function initBlurText(el, baseDelay = 0.3) {
+  const text = el.textContent;
+  el.innerHTML = '';
+  [...text].forEach((char, i) => {
+    const span = document.createElement('span');
+    span.className = 'blur-char';
+    span.textContent = char === ' ' ? '\u00A0' : char;
+    span.style.animationDelay = `${baseDelay + i * 0.08}s`;
+    el.appendChild(span);
+  });
+}
+
+// ========== SplitText Effect ==========
+function initSplitText(el, baseDelay = 0.8) {
+  const text = el.textContent;
+  el.style.perspective = '600px';
+  el.innerHTML = '';
+  [...text].forEach((char, i) => {
+    const span = document.createElement('span');
+    span.className = 'split-char';
+    span.textContent = char === ' ' ? '\u00A0' : char;
+    span.style.animationDelay = `${baseDelay + i * 0.04}s`;
+    el.appendChild(span);
+  });
+}
+
+// ========== Spotlight Card Effect ==========
+function initSpotlightCards() {
+  document.querySelectorAll('.recipe-card').forEach(card => {
+    const spotlight = card.querySelector('.card-spotlight');
+    if (!spotlight) return;
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      spotlight.style.setProperty('--x', x + 'px');
+      spotlight.style.setProperty('--y', y + 'px');
+    });
+  });
+}
+
+// ========== Init ==========
+initBlurText(document.getElementById('siteTitle'));
+initSplitText(document.getElementById('siteSubtitle'));
+renderCards('all');
+</script>
+</body>
+</html>
